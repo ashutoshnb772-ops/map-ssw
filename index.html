@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SupplySide Global 2026 | Indoor Wayfinding & Navigation</title>
+  <meta name="description" content="Official indoor navigation system for SupplySide Global 2026 at Mandalay Bay Convention Center. Search 1,600+ booths, find shortest walkable routes, and get turn-by-turn guidance." />
+  
+  <!-- Modern Typography: Outfit & Inter from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Header Bar -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-badge">SSG '26</div>
+        <div class="brand-info">
+          <h1>SupplySide Global 2026 <span class="tag-live">WAYFINDER</span></h1>
+          <p class="subtitle"><i class="fa-solid fa-location-dot"></i> Mandalay Bay Convention Center &bull; 1,611 Exhibitors</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Map View Mode Switcher -->
+        <div class="map-mode-selector" id="mapModeSelector">
+          <button class="mode-btn active" data-mode="canvas" id="btnModeCanvas" title="Live Interactive Pathfinding Map">
+            <i class="fa-solid fa-route"></i> Live Route Map
+          </button>
+          <button class="mode-btn" data-mode="official" id="btnModeOfficial" title="Official SupplySide Floor Plan">
+            <i class="fa-solid fa-globe"></i> SupplySide.com
+          </button>
+          <button class="mode-btn" data-mode="a2z" id="btnModeA2Z" title="A2Z Interactive Event Map">
+            <i class="fa-solid fa-map"></i> A2Z Floor Plan
+          </button>
+        </div>
+
+        <!-- Floor Level Pills -->
+        <div class="level-selector" id="levelSelector">
+          <span class="level-label">Level:</span>
+          <button class="level-btn active" data-level="1" id="btnLevel1">Level 1 (Bayside)</button>
+          <button class="level-btn" data-level="2" id="btnLevel2">Level 2 (Shoreline)</button>
+          <button class="level-btn" data-level="ll" id="btnLevelLL">Lower Level (LL)</button>
+        </div>
+
+        <button class="header-btn" id="btnToggleSidebar" title="Toggle Navigation Sidebar">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="main-workspace">
+      <!-- Navigation & Wayfinding Sidebar -->
+      <aside class="nav-sidebar" id="navSidebar">
+        <!-- Tab Navigation -->
+        <div class="sidebar-tabs">
+          <button class="tab-btn active" data-tab="routingTab" id="tabRouting">
+            <i class="fa-solid fa-diamond-turn-right"></i> Directions
+          </button>
+          <button class="tab-btn" data-tab="directoryTab" id="tabDirectory">
+            <i class="fa-solid fa-store"></i> Exhibitors <span class="count-pill">1,611</span>
+          </button>
+          <button class="tab-btn" data-tab="scheduleTab" id="tabSchedule">
+            <i class="fa-solid fa-calendar-check"></i> My Schedule <span class="count-pill count-accent" id="scheduleCountBadge">0</span>
+          </button>
+        </div>
+
+        <!-- TAB 1: ROUTING & DIRECTIONS -->
+        <div class="tab-pane active" id="routingTab">
+          <div class="routing-card">
+            <!-- Starting Location Input -->
+            <div class="route-input-group">
+              <label class="input-label" for="startLocationInput">
+                <span class="dot-indicator dot-start"></span>
+                <span>My Current Location</span>
+              </label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-location-crosshairs input-icon icon-start"></i>
+                <input 
+                  type="text" 
+                  id="startLocationInput" 
+                  placeholder="Enter booth # (e.g. 2438) or landmark..." 
+                  autocomplete="off" 
+                />
+                <button class="clear-input-btn" id="clearStartBtn" title="Clear start location">&times;</button>
+              </div>
+              <div class="suggestions-list" id="startSuggestions"></div>
+            </div>
+
+            <!-- Swap From/To Button -->
+            <div class="swap-divider">
+              <button class="btn-swap" id="btnSwapLocations" title="Swap Start and Destination">
+                <i class="fa-solid fa-arrow-down-up-across-line"></i>
+              </button>
+            </div>
+
+            <!-- Destination Input -->
+            <div class="route-input-group">
+              <label class="input-label" for="destLocationInput">
+                <span class="dot-indicator dot-dest"></span>
+                <span>Destination Booth / Exhibitor</span>
+              </label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-flag-checkered input-icon icon-dest"></i>
+                <input 
+                  type="text" 
+                  id="destLocationInput" 
+                  placeholder="Search company or booth (e.g. 4513, Kerry)..." 
+                  autocomplete="off" 
+                />
+                <button class="clear-input-btn" id="clearDestBtn" title="Clear destination">&times;</button>
+              </div>
+              <div class="suggestions-list" id="destSuggestions"></div>
+            </div>
+
+            <!-- Quick Landmark Chips -->
+            <div class="quick-chips-section">
+              <span class="chips-title">Quick Start Locations:</span>
+              <div class="chips-row">
+                <button class="chip-btn" data-loc="Main Entrance" data-booth="1000">Main Entrance</button>
+                <button class="chip-btn" data-loc="Bayside Lobby" data-booth="1200">Bayside Lobby</button>
+                <button class="chip-btn" data-loc="Central Food Court" data-booth="4000">Food Court</button>
+                <button class="chip-btn" data-loc="Zen Den (LL)" data-booth="7000">Zen Den (LL)</button>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="route-actions-row">
+              <button class="btn-primary" id="btnFindRoute">
+                <i class="fa-solid fa-route"></i> Get Walking Route
+              </button>
+              <button class="btn-secondary" id="btnClearRoute" title="Clear current route">
+                <i class="fa-solid fa-trash-can"></i> Clear
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Route Info Card -->
+          <div class="route-summary-card" id="routeSummaryCard" style="display: none;">
+            <div class="summary-header">
+              <div class="summary-metrics">
+                <div class="metric">
+                  <span class="metric-label">Est. Walk</span>
+                  <span class="metric-value" id="routeTime"><i class="fa-regular fa-clock"></i> 44s</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric">
+                  <span class="metric-label">Distance</span>
+                  <span class="metric-value" id="routeDistance"><i class="fa-solid fa-person-walking"></i> 145 ft</span>
+                </div>
+              </div>
+              <button class="btn-voice" id="btnVoiceGuidance" title="Listen to step-by-step directions">
+                <i class="fa-solid fa-volume-high"></i> Listen
+              </button>
+            </div>
+
+            <div class="turn-directions-container">
+              <h4 class="directions-heading"><i class="fa-solid fa-list-ol"></i> Step-by-Step Directions:</h4>
+              <ul class="steps-list" id="stepsList">
+                <!-- Dynamically populated -->
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: 1,611 EXHIBITORS DIRECTORY -->
+        <div class="tab-pane" id="directoryTab">
+          <div class="directory-search-wrapper">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input 
+              type="text" 
+              id="directorySearchInput" 
+              placeholder="Search 1,611 exhibitors or booth #..." 
+            />
+          </div>
+
+          <!-- Aisle Filters -->
+          <div class="aisle-filter-scroll" id="aisleFilters">
+            <button class="filter-pill active" data-filter="all">All Aisles</button>
+            <button class="filter-pill" data-filter="1000">1000s</button>
+            <button class="filter-pill" data-filter="2000">2000s</button>
+            <button class="filter-pill" data-filter="3000">3000s</button>
+            <button class="filter-pill" data-filter="4000">4000s</button>
+            <button class="filter-pill" data-filter="5000">5000s</button>
+            <button class="filter-pill" data-filter="6000">6000s</button>
+            <button class="filter-pill" data-filter="7000">7000s</button>
+          </div>
+
+          <!-- Exhibitor Cards List -->
+          <div class="exhibitor-cards-list" id="exhibitorCardsList">
+            <div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Loading exhibitors...</div>
+          </div>
+        </div>
+
+        <!-- TAB 3: VISIT SCHEDULE & DAY PLANNER -->
+        <div class="tab-pane" id="scheduleTab">
+          <!-- Schedule Header & Progress -->
+          <div class="schedule-summary-card">
+            <div class="schedule-progress-row">
+              <div class="schedule-stats">
+                <span class="schedule-stats-title">Visit Progress</span>
+                <span class="schedule-stats-value" id="scheduleProgressText">0 / 0 Booths Visited</span>
+              </div>
+              <span class="progress-percent-badge" id="scheduleProgressPercent">0%</span>
+            </div>
+            <div class="schedule-progress-track">
+              <div class="schedule-progress-fill" id="scheduleProgressBar" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- Quick Add Exhibitor to Schedule Input -->
+          <div class="schedule-quick-add">
+            <div class="input-wrapper">
+              <i class="fa-solid fa-calendar-plus input-icon icon-schedule"></i>
+              <input 
+                type="text" 
+                id="scheduleSearchInput" 
+                placeholder="Search booth # or company to add to visit plan..." 
+                autocomplete="off" 
+              />
+            </div>
+            <div class="suggestions-list" id="scheduleSuggestions"></div>
+          </div>
+
+          <!-- Day Selection Tabs -->
+          <div class="day-filter-bar" id="dayFilterBar">
+            <button class="day-pill active" data-day="all">
+              <span class="day-pill-name">All Days</span>
+              <span class="day-pill-count" id="countAllDays">0</span>
+            </button>
+            <button class="day-pill" data-day="1">
+              <span class="day-pill-name">Day 1</span>
+              <span class="day-pill-sub">Wed Oct 28</span>
+              <span class="day-pill-count" id="countDay1">0</span>
+            </button>
+            <button class="day-pill" data-day="2">
+              <span class="day-pill-name">Day 2</span>
+              <span class="day-pill-sub">Thu Oct 29</span>
+              <span class="day-pill-count" id="countDay2">0</span>
+            </button>
+            <button class="day-pill" data-day="3">
+              <span class="day-pill-name">Day 3</span>
+              <span class="day-pill-sub">Fri Oct 30</span>
+              <span class="day-pill-count" id="countDay3">0</span>
+            </button>
+          </div>
+
+          <!-- Batch Day Actions -->
+          <div class="schedule-batch-actions" id="scheduleBatchActions">
+            <button class="btn-primary btn-plan-route" id="btnRouteScheduledDay">
+              <i class="fa-solid fa-route"></i> Route Day's Booths
+            </button>
+            <button class="btn-secondary btn-export-schedule" id="btnExportSchedule" title="Export Itinerary">
+              <i class="fa-solid fa-file-arrow-down"></i> Export
+            </button>
+            <button class="btn-secondary btn-clear-day" id="btnClearDaySchedule" title="Clear this day">
+              <i class="fa-solid fa-trash-can"></i> Clear
+            </button>
+          </div>
+
+          <!-- Scheduled Cards List -->
+          <div class="scheduled-cards-list" id="scheduledCardsList">
+            <!-- Dynamically populated or empty state -->
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Map Stage -->
+      <main class="map-stage">
+        <!-- Interactive Vector Map Canvas (Active by Default) -->
+        <div id="interactiveMapStage" class="interactive-map-stage">
+          <canvas id="mapCanvas"></canvas>
+          
+          <!-- Route Legend Badge -->
+          <div class="map-legend-badge">
+            <span class="legend-item"><span class="dot-indicator dot-start"></span> Start</span>
+            <span class="legend-item"><span class="dot-indicator dot-dest"></span> Destination</span>
+            <span class="legend-item"><span class="dot-indicator dot-scheduled"></span> Planned Visit</span>
+            <span class="legend-item"><span class="legend-line"></span> Walkable Path</span>
+          </div>
+
+          <!-- Compass & Venue Info Watermark -->
+          <div class="map-venue-tag">
+            <strong>Mandalay Bay Expo Hall</strong> &bull; Level 1 Bayside
+          </div>
+        </div>
+
+        <!-- External Official Embed Container (When switched to Official or A2Z mode) -->
+        <div id="externalFrameContainer" class="external-frame-container" style="display: none;">
+          <iframe 
+            id="externalIframe" 
+            src="about:blank" 
+            title="SupplySide Global Floor Plan"
+            allow="fullscreen"
+          ></iframe>
+        </div>
+
+        <!-- Map Floating Controls -->
+        <div class="map-floating-controls">
+          <button class="map-ctrl-btn" id="btnZoomIn" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
+          <button class="map-ctrl-btn" id="btnZoomOut" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
+          <button class="map-ctrl-btn" id="btnResetView" title="Reset View"><i class="fa-solid fa-expand"></i></button>
+          <button class="map-ctrl-btn" id="btnLocateMe" title="Locate Current Position"><i class="fa-solid fa-crosshairs"></i></button>
+        </div>
+
+        <!-- Selected Booth Popup Bubble -->
+        <div class="booth-action-modal" id="boothActionModal" style="display: none;">
+          <div class="modal-card">
+            <button class="modal-close-btn" id="btnCloseBoothModal">&times;</button>
+            <div class="modal-header">
+              <span class="modal-booth-badge" id="modalBoothNumber">Booth #----</span>
+              <h3 class="modal-company-title" id="modalCompanyName">Company Name</h3>
+            </div>
+            <p class="modal-instruction">What would you like to do with this booth?</p>
+            <div class="modal-actions">
+              <button class="modal-btn btn-set-start" id="btnModalSetStart">
+                <i class="fa-solid fa-location-dot"></i> I Am Here (Start)
+              </button>
+              <button class="modal-btn btn-set-dest" id="btnModalSetDest">
+                <i class="fa-solid fa-diamond-turn-right"></i> Navigate Here (Destination)
+              </button>
+              <button class="modal-btn btn-add-plan" id="btnModalAddSchedule">
+                <i class="fa-solid fa-calendar-plus"></i> Add to Visit Plan
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schedule Add / Edit Modal -->
+        <div class="booth-action-modal schedule-modal-overlay" id="scheduleModal" style="display: none;">
+          <div class="modal-card schedule-dialog-card">
+            <button class="modal-close-btn" id="btnCloseScheduleModal">&times;</button>
+            <div class="modal-header">
+              <span class="modal-booth-badge" id="schedModalBooth">Booth #----</span>
+              <h3 class="modal-company-title" id="schedModalCompany">Company Name</h3>
+              <p class="modal-subtext" id="schedModalLocation">Level 1 &bull; Bayside Hall</p>
+            </div>
+
+            <form id="scheduleForm" class="schedule-form" onsubmit="return false;">
+              <input type="hidden" id="schedItemBooth" />
+              <input type="hidden" id="schedItemName" />
+
+              <!-- Day Selector -->
+              <div class="form-group">
+                <label class="form-label"><i class="fa-regular fa-calendar"></i> Visit Day:</label>
+                <div class="day-select-grid">
+                  <label class="day-radio-card">
+                    <input type="radio" name="visitDayRadio" value="1" checked />
+                    <div class="day-card-content">
+                      <span class="d-day">Day 1</span>
+                      <span class="d-date">Wed, Oct 28</span>
+                    </div>
+                  </label>
+                  <label class="day-radio-card">
+                    <input type="radio" name="visitDayRadio" value="2" />
+                    <div class="day-card-content">
+                      <span class="d-day">Day 2</span>
+                      <span class="d-date">Thu, Oct 29</span>
+                    </div>
+                  </label>
+                  <label class="day-radio-card">
+                    <input type="radio" name="visitDayRadio" value="3" />
+                    <div class="day-card-content">
+                      <span class="d-day">Day 3</span>
+                      <span class="d-date">Fri, Oct 30</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Meeting Time (Optional) -->
+              <div class="form-group">
+                <label class="form-label" for="schedTimeInput"><i class="fa-regular fa-clock"></i> Target Meeting Time (Optional):</label>
+                <div class="time-input-row">
+                  <input type="time" id="schedTimeInput" class="time-picker" />
+                  <select id="schedQuickTime" class="time-select">
+                    <option value="">Quick Slot...</option>
+                    <option value="09:30">09:30 AM (Opening)</option>
+                    <option value="11:00">11:00 AM (Morning)</option>
+                    <option value="13:30">01:30 PM (After Lunch)</option>
+                    <option value="15:00">03:00 PM (Afternoon)</option>
+                    <option value="16:30">04:30 PM (Late Expo)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Meeting Objective / Notes (Optional) -->
+              <div class="form-group">
+                <label class="form-label" for="schedNotesInput"><i class="fa-regular fa-note-sticky"></i> Meeting Goal / Notes (Optional):</label>
+                <textarea 
+                  id="schedNotesInput" 
+                  rows="2" 
+                  placeholder="e.g. Discuss private label pricing, pick up sample catalog, meet with sales team..."
+                ></textarea>
+              </div>
+
+              <!-- Form Buttons -->
+              <div class="modal-actions">
+                <button type="button" class="modal-btn btn-set-dest" id="btnSaveScheduleItem">
+                  <i class="fa-solid fa-calendar-check"></i> Save to Visit Plan
+                </button>
+                <button type="button" class="modal-btn btn-secondary-modal" id="btnCancelScheduleModal">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Notification Toast -->
+        <div class="toast-notification" id="toastNotification" style="display: none;"></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Main Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
