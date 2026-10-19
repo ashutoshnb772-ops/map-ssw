@@ -487,8 +487,10 @@ function setupEventListeners() {
       } else if (mode === 'official') {
         DOM.interactiveMapStage.style.display = 'none';
         DOM.externalFrameContainer.style.display = 'block';
-        DOM.externalIframe.src = 'https://www.supplysideglobal.com/floor-plan/';
-        showToast('Loading Official SupplySide.com Floor Plan');
+        if (!DOM.externalIframe.src || DOM.externalIframe.src.includes('about:blank') || DOM.externalIframe.src.endsWith('/floor-plan/')) {
+          DOM.externalIframe.src = 'https://attendees.supplysideshow.com/widget/event/supplyside-global-2026-1/maps/RXZlbnRWaWV3XzI0MTc3Nzc=?paginationMode=infinite';
+        }
+        showToast('Viewing Official SupplySide Navigation System');
       } else if (mode === 'a2z') {
         DOM.interactiveMapStage.style.display = 'none';
         DOM.externalFrameContainer.style.display = 'block';

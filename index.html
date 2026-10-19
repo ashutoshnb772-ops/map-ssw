@@ -31,11 +31,11 @@
       <div class="header-actions">
         <!-- Map View Mode Switcher -->
         <div class="map-mode-selector" id="mapModeSelector">
-          <button class="mode-btn active" data-mode="canvas" id="btnModeCanvas" title="Live Interactive Pathfinding Map">
-            <i class="fa-solid fa-route"></i> Live Route Map
+          <button class="mode-btn active" data-mode="official" id="btnModeOfficial" title="Official SupplySide Navigation System">
+            <i class="fa-solid fa-compass"></i> Official Expo Map
           </button>
-          <button class="mode-btn" data-mode="official" id="btnModeOfficial" title="Official SupplySide Floor Plan">
-            <i class="fa-solid fa-globe"></i> SupplySide.com
+          <button class="mode-btn" data-mode="canvas" id="btnModeCanvas" title="Custom 2D Pathfinding Map">
+            <i class="fa-solid fa-route"></i> 2D Route Map
           </button>
           <button class="mode-btn" data-mode="a2z" id="btnModeA2Z" title="A2Z Interactive Event Map">
             <i class="fa-solid fa-map"></i> A2Z Floor Plan
@@ -275,8 +275,8 @@
 
       <!-- Main Map Stage -->
       <main class="map-stage">
-        <!-- Interactive Vector Map Canvas (Active by Default) -->
-        <div id="interactiveMapStage" class="interactive-map-stage">
+        <!-- Interactive Vector Map Canvas (Toggleable via 2D Route Map Mode) -->
+        <div id="interactiveMapStage" class="interactive-map-stage" style="display: none;">
           <canvas id="mapCanvas"></canvas>
           
           <!-- Route Legend Badge -->
@@ -293,13 +293,14 @@
           </div>
         </div>
 
-        <!-- External Official Embed Container (When switched to Official or A2Z mode) -->
-        <div id="externalFrameContainer" class="external-frame-container" style="display: none;">
+        <!-- Official Floor Plan Navigation System (Option B: Active by Default) -->
+        <div id="externalFrameContainer" class="external-frame-container" style="display: block;">
           <iframe 
             id="externalIframe" 
-            src="about:blank" 
-            title="SupplySide Global Floor Plan"
-            allow="fullscreen"
+            src="https://attendees.supplysideshow.com/widget/event/supplyside-global-2026-1/maps/RXZlbnRWaWV3XzI0MTc3Nzc=?paginationMode=infinite" 
+            title="Official SupplySide Global Navigation System"
+            allow="fullscreen; geolocation"
+            loading="eager"
           ></iframe>
         </div>
 
