@@ -144,9 +144,9 @@ const HallModel = {
   ],
   
   crossConcourses: [
-    { name: 'North Concourse', y: 150 },
+    { name: 'North Concourse', y: 300 },
     { name: 'Central Concourse', y: 550 },
-    { name: 'South Concourse', y: 920 }
+    { name: 'South Concourse', y: 780 }
   ],
   
   // Realistic Hubs, Entrances, Dining & Stages
@@ -225,11 +225,11 @@ const HallModel = {
       id: 'main-innovation-stage',
       name: 'Main Innovation Stage', 
       shortName: 'Innovation Stage',
-      aisle: 6400,
-      x: 1980, 
-      y: 75, 
-      width: 200, 
-      height: 75, 
+      aisle: 5500,
+      x: 1720, 
+      y: 840, 
+      width: 190, 
+      height: 85, 
       icon: 'fa-microphone', 
       type: 'stage', 
       level: '1',
@@ -376,6 +376,25 @@ function getAisleLevel(aisle) {
 }
 
 /**
+ * Calculate Precise World Y Coordinate for a Booth along its Aisle
+ * In the real Mandalay Bay Convention Center floor plan:
+ * - South (Front Entrance / Registration / Lobby F & E) is at the BOTTOM (y ≈ 880).
+ * - North (Back Wall / West Russell Rd) is at the TOP (y ≈ 200).
+ * - Booth numbering starts at the South with low numbers (01-25) at the bottom,
+ *   and increases towards the North with high numbers (70-95) at the top.
+ */
+function getBoothY(aisle, pos) {
+  if (aisle >= 7000) {
+    // Shoreline / Bayside A Hall (Level 2 / East Wing) is offset southwards,
+    // spanning y = 440 (North) to y = 980 (South)
+    return 980 - (pos / 92) * 540;
+  } else {
+    // Level 1 Bayside Main Hall spanning y = 200 (North) to y = 880 (South)
+    return 880 - (pos / 92) * 680;
+  }
+}
+
+/**
  * Load 1,611 exhibitors & build exact coordinate map
  */
 async function loadExhibitorsData() {
@@ -396,7 +415,7 @@ async function loadExhibitorsData() {
         const level = getAisleLevel(aisle);
         const isEven = (pos % 2 === 0);
         const booth_x = aisle_x + (isEven ? 16 : -16);
-        const booth_y = 180 + (pos / 92) * 720;
+        const booth_y = getBoothY(aisle, pos);
 
         AppState.boothsMap.set(boothStr, {
           booth: boothStr,
@@ -1009,7 +1028,7 @@ function getExactBoothCoord(target) {
     const level = getAisleLevel(aisle);
     const isEven = (pos % 2 === 0);
     const booth_x = aisle_x + (isEven ? 16 : -16);
-    const booth_y = 180 + (pos / 92) * 720;
+    const booth_y = getBoothY(aisle, pos);
     return {
       booth: cleanNum,
       name: `Booth #${cleanNum}`,
@@ -1210,12 +1229,8 @@ function calculateAndRenderRoute() {
   } else {
     // SAME-HALL ROUTING (Within West Hall or Within East Hall)
     const concourses = isStartEast
-      ? [{ y: 550, name: 'North Concourse' }, { y: 780, name: 'Central Concourse' }, { y: 920, name: 'South Concourse' }]
-      : [
-          { y: 150, name: 'North Concourse' },
-          { y: 550, name: 'Central Concourse' },
-          { y: 920, name: 'South Concourse' }
-        ];
+      ? [{ y: 550, name: 'North Concourse' }, { y: 750, name: 'Central Concourse' }, { y: 920, name: 'South Concourse' }]
+      : HallModel.crossConcourses;
 
     let bestConcourse = concourses[1];
     let minWalkDistance = Infinity;
@@ -1508,7 +1523,7 @@ function drawCanvasMap() {
     ctx.lineWidth = 1;
 
     for (let pos = 10; pos <= 88; pos += 4) {
-      const by = 180 + (pos / 92) * 720;
+      const by = getBoothY(aisleNum, pos);
       roundRect(ctx, x - 26, by - 6, 11, 12, 2, true, true);
       roundRect(ctx, x + 15, by - 6, 11, 12, 2, true, true);
     }
