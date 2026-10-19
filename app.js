@@ -127,7 +127,7 @@ const HallModel = {
   
   // Halls and Levels Breakdown
   halls: {
-    level1_west: { name: 'Level 1 West Wing', minAisle: 200, maxAisle: 1300, minX: 120, maxX: 480 },
+    level2_oceanside: { name: 'Level 2 Oceanside Ballrooms & Bark Park', minAisle: 200, maxAisle: 1300, minX: 120, maxX: 480 },
     level1_bayside: { name: 'Level 1 Bayside Main Hall', minAisle: 1800, maxAisle: 6800, minX: 560, maxX: 2200 },
     level2_shoreline: { name: 'Level 2 Shoreline Hall', minAisle: 7000, maxAisle: 8100, minX: 2280, maxX: 2740 }
   },
@@ -371,8 +371,9 @@ function getAisleX(aisle) {
  * Determine Floor Level for an Aisle
  */
 function getAisleLevel(aisle) {
-  if (aisle >= 7000) return '2'; // Shoreline Hall (Level 2)
-  return '1'; // Bayside Hall (Level 1)
+  if (aisle <= 1300) return '2'; // Level 2 (Oceanside Ballrooms & Bark Park)
+  if (aisle >= 7000) return '2'; // Level 2 (Shoreline / Bayside A Hall)
+  return '1'; // Level 1 (Bayside Main Hall)
 }
 
 /**
@@ -1094,22 +1095,124 @@ function calculateAndRenderRoute() {
 
   const startName = startEx.name;
   const destName = destEx.name;
+  const isStartLevel2 = (startCoord.level === '2');
+  const isDestLevel2 = (destCoord.level === '2');
+  const isMultiLevel = (isStartLevel2 !== isDestLevel2);
   const isStartEast = (startCoord.aisle >= 7000);
   const isDestEast = (destCoord.aisle >= 7000);
-  const isInterHall = (isStartEast !== isDestEast);
-  const isMultiLevel = isInterHall;
+  const isInterHall = isMultiLevel || (isStartEast !== isDestEast);
 
   // 3. True Convention Pathfinding:
   const waypoints = [];
   const steps = [];
 
-  // Official Connector Foyer Transition Points (Connecting West Bayside & East Shoreline Halls)
-  const lobbyCPt = { x: 2180, y: 550 }; // Lobby C Exit on Central Concourse
+  // Official Connector Foyer & Escalator Hub Transition Points
+  const lobbyCPt = { x: 2180, y: 550 }; // Lobby C Exit on Central Concourse / Escalator Landing
   const lobbyBPt = { x: 2215, y: 780 }; // Lobby B Entrance into Shoreline / Bayside A Hall
 
   let distanceFt = 0;
 
-  if (isInterHall) {
+  if (isMultiLevel) {
+    if (isStartLevel2 && !isDestLevel2) {
+      // LEVEL 2 (e.g. Booth 1201 in Oceanside / Shoreline) TO LEVEL 1 (e.g. Booth 5880 in Bayside)
+      waypoints.push({ x: startCoord.booth_x, y: startCoord.booth_y });
+      waypoints.push({ x: startCoord.aisle_x, y: startCoord.booth_y });
+      waypoints.push({ x: startCoord.aisle_x, y: 550 });
+      waypoints.push({ x: lobbyCPt.x, y: 550 }); // Grand Escalator Hub
+      waypoints.push({ x: destCoord.aisle_x, y: 550 });
+      waypoints.push({ x: destCoord.aisle_x, y: destCoord.booth_y });
+      waypoints.push({ x: destCoord.booth_x, y: destCoord.booth_y });
+
+      const startTag = startCoord.isLandmark ? '' : ` (Booth #${startCoord.booth})`;
+      steps.push({
+        icon: 'fa-solid fa-location-dot',
+        text: `Start at <strong>${escapeHtml(startName)}</strong>${startTag}.`,
+        subtext: `Level 2 (Oceanside / Shoreline Ballrooms) &bull; Near Aisle ${startCoord.aisle}`
+      });
+
+      steps.push({
+        icon: 'fa-solid fa-arrow-right',
+        text: `Walk along Oceanside Foyer past Bark Park toward <strong>Grand Escalators</strong>.`,
+        subtext: `Level 2 walkway (~1,091 ft to escalator)`
+      });
+
+      steps.push({
+        icon: 'fa-solid fa-stairs',
+        text: `🪜 Take the <strong>Grand Escalators DOWN</strong> from Level 2 to <strong>Level 1 (Bayside Main Hall)</strong>.`,
+        subtext: `Transition between convention levels at Lobby C`
+      });
+
+      steps.push({
+        icon: 'fa-solid fa-arrow-left',
+        text: `Exit escalators at <strong>Lobby C</strong> and walk West onto <strong>Central Concourse</strong> toward Aisle ${destCoord.aisle}.`,
+        subtext: `Follow main concourse on Level 1`
+      });
+
+      const destWalkTarget = destCoord.isLandmark ? destName : `Booth #${destCoord.booth}`;
+      steps.push({
+        icon: 'fa-solid fa-diamond-turn-right',
+        text: `Turn into <strong>Aisle ${destCoord.aisle}</strong> and proceed toward ${destWalkTarget}.`,
+        subtext: `Destination on your ${destCoord.isEven ? 'right' : 'left'}`
+      });
+
+      const destTag = destCoord.isLandmark ? '' : ` (Booth #${destCoord.booth})`;
+      steps.push({
+        icon: 'fa-solid fa-flag-checkered',
+        text: `Arrive at destination: <strong>${escapeHtml(destName)}</strong>${destTag}.`,
+        subtext: `Level 1 Bayside Main Hall`
+      });
+
+    } else {
+      // LEVEL 1 (Bayside) TO LEVEL 2 (Oceanside / Shoreline)
+      waypoints.push({ x: startCoord.booth_x, y: startCoord.booth_y });
+      waypoints.push({ x: startCoord.aisle_x, y: startCoord.booth_y });
+      waypoints.push({ x: startCoord.aisle_x, y: 550 });
+      waypoints.push({ x: lobbyCPt.x, y: 550 });
+      waypoints.push({ x: destCoord.aisle_x, y: 550 });
+      waypoints.push({ x: destCoord.aisle_x, y: destCoord.booth_y });
+      waypoints.push({ x: destCoord.booth_x, y: destCoord.booth_y });
+
+      const startTag = startCoord.isLandmark ? '' : ` (Booth #${startCoord.booth})`;
+      steps.push({
+        icon: 'fa-solid fa-location-dot',
+        text: `Start at <strong>${escapeHtml(startName)}</strong>${startTag}.`,
+        subtext: `Level 1 Bayside Main Hall &bull; Near Aisle ${startCoord.aisle}`
+      });
+
+      steps.push({
+        icon: 'fa-solid fa-arrow-right',
+        text: `Walk along Central Concourse toward <strong>Lobby C Grand Escalators</strong>.`,
+        subtext: `Follow main concourse corridor toward east exit`
+      });
+
+      steps.push({
+        icon: 'fa-solid fa-stairs',
+        text: `🪜 Take the <strong>Grand Escalators UP</strong> to <strong>Level 2</strong>.`,
+        subtext: `Transition between convention levels`
+      });
+
+      steps.push({
+        icon: 'fa-solid fa-arrow-right',
+        text: `Proceed along Oceanside Foyer on Level 2 toward Aisle ${destCoord.aisle}.`,
+        subtext: `Level 2 Oceanside Ballrooms &bull; ~1,091 ft`
+      });
+
+      const destWalkTarget = destCoord.isLandmark ? destName : `Booth #${destCoord.booth}`;
+      steps.push({
+        icon: 'fa-solid fa-diamond-turn-right',
+        text: `Turn into <strong>Aisle ${destCoord.aisle}</strong> and proceed toward ${destWalkTarget}.`,
+        subtext: `Destination on your ${destCoord.isEven ? 'right' : 'left'}`
+      });
+
+      const destTag = destCoord.isLandmark ? '' : ` (Booth #${destCoord.booth})`;
+      steps.push({
+        icon: 'fa-solid fa-flag-checkered',
+        text: `Arrive at destination: <strong>${escapeHtml(destName)}</strong>${destTag}.`,
+        subtext: `Destination reached on Level 2`
+      });
+    }
+
+  } else if (isInterHall) {
     if (!isStartEast && isDestEast) {
       // WEST HALL (e.g. Booth 2120) TO EAST HALL (e.g. Booth 7776)
       // 1. Depart booth into start aisle walkway
