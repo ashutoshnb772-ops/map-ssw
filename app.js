@@ -191,7 +191,7 @@ const HallModel = {
       icon: 'fa-utensils', 
       type: 'amenity', 
       level: '1',
-      aliases: ['food court', 'food', 'dining', 'lunch', 'restaurant', 'dining pavilion', 'cafeteria', 'eat', 'eats', 'meals', 'dining area']
+      aliases: ['food court', 'main food court', 'dining pavilion', 'dining hall', 'cafeteria', 'lunch area']
     },
     { 
       id: 'south-concessions-cafe',
@@ -205,7 +205,7 @@ const HallModel = {
       icon: 'fa-coffee', 
       type: 'amenity', 
       level: '1',
-      aliases: ['cafe', 'coffee', 'south concessions', 'concessions', 'snack', 'drinks', 'beverages', 'south cafe']
+      aliases: ['south concessions', 'south cafe', 'coffee shop', 'cafe lounge']
     },
     { 
       id: 'first-time-showcase',
@@ -219,7 +219,7 @@ const HallModel = {
       icon: 'fa-star', 
       type: 'stage', 
       level: '1',
-      aliases: ['first-time exhibitor showcase', 'first time showcase', 'first time', 'showcase', 'new exhibitors', 'first-time']
+      aliases: ['first-time exhibitor showcase', 'first time showcase', 'new exhibitor showcase', 'new exhibitors']
     },
     { 
       id: 'main-innovation-stage',
@@ -233,7 +233,7 @@ const HallModel = {
       icon: 'fa-microphone', 
       type: 'stage', 
       level: '1',
-      aliases: ['main stage', 'innovation stage', 'stage', 'keynote', 'speaker stage', 'presentations', 'main innovation stage']
+      aliases: ['main innovation stage', 'innovation stage', 'main stage', 'speaker stage', 'keynote stage']
     },
     { 
       id: 'grand-escalators',
@@ -691,43 +691,66 @@ function setupEventListeners() {
 }
 
 /**
+ * Extract clean numeric booth digits from string (e.g. "Booth #2120" -> "2120")
+ */
+function extractBoothDigits(text) {
+  if (!text) return '';
+  const match = String(text).match(/(?:booth\s*#?|#)?\s*(\d{2,5})/i);
+  return match ? match[1] : '';
+}
+
+/**
  * Resolve input string or object to matching Landmark
  */
 function resolveLandmark(inputVal) {
   if (!inputVal) return null;
   if (typeof inputVal === 'object') {
     if (inputVal.isLandmark && inputVal.landmark) return inputVal.landmark;
-    if (inputVal.name) inputVal = inputVal.name;
-    else if (inputVal.booth) inputVal = inputVal.booth;
-    else return null;
+    if (inputVal.isLandmark) {
+      inputVal = inputVal.name || inputVal.booth;
+    } else {
+      // It's an exhibitor or booth object, definitely not a landmark
+      return null;
+    }
   }
   
   const raw = String(inputVal).trim().toLowerCase();
   if (!raw) return null;
 
-  // 1. Direct exact id match or name match
+  // Never match landmarks if explicit booth digits or booth tags are provided
+  if (/\b(?:booth|#)\s*\d{2,5}\b/i.test(raw) || /\(\s*booth\s*#\d+\s*\)/i.test(raw)) {
+    return null;
+  }
+  if (/^\d{2,5}$/.test(raw)) {
+    return null;
+  }
+
+  // 1. Direct exact id match or exact name match
   for (const lm of HallModel.landmarks) {
     if (lm.id === raw || lm.name.toLowerCase() === raw || lm.shortName.toLowerCase() === raw) {
       return lm;
     }
   }
 
-  // 2. Keyword / alias match
+  // 2. Exact alias match or multi-word phrase match
   for (const lm of HallModel.landmarks) {
     if (lm.aliases) {
       for (const alias of lm.aliases) {
-        if (raw === alias || raw.includes(alias)) {
+        if (raw === alias) {
+          return lm;
+        }
+        if (alias.length >= 6 && raw.includes(alias)) {
           return lm;
         }
       }
     }
   }
 
-  // 3. Raw string contains full landmark name or landmark name contains raw
+  // 3. Exact full landmark name match
   for (const lm of HallModel.landmarks) {
     const lName = lm.name.toLowerCase();
     const lShort = lm.shortName.toLowerCase();
-    if (raw.includes(lName) || lName.includes(raw) || raw.includes(lShort) || lShort.includes(raw)) {
+    if (raw === lName || raw === lShort) {
       return lm;
     }
   }
@@ -740,12 +763,31 @@ function resolveLandmark(inputVal) {
  */
 function resolveExhibitor(inputVal) {
   if (!inputVal) return null;
-  if (typeof inputVal === 'object' && inputVal.isLandmark) {
-    return inputVal;
+  if (typeof inputVal === 'object') {
+    if (inputVal.isLandmark) return inputVal;
+    if (inputVal.booth) {
+      const cleanB = extractBoothDigits(inputVal.booth);
+      if (cleanB && AppState.boothsMap.has(cleanB)) {
+        return AppState.boothsMap.get(cleanB);
+      }
+      return inputVal;
+    }
   }
 
-  // 1. Priority: check if it's an official Landmark (Food Court, Entrance, Registration, etc.)
-  const lm = resolveLandmark(inputVal);
+  const clean = String(inputVal).trim();
+  const cleanDigits = extractBoothDigits(clean);
+
+  // 1. If explicit booth digits are present, resolve by booth number FIRST!
+  if (cleanDigits) {
+    if (AppState.boothsMap.has(cleanDigits)) {
+      return AppState.boothsMap.get(cleanDigits);
+    }
+    const foundByBooth = AppState.exhibitors.find(e => e.booth === cleanDigits);
+    if (foundByBooth) return foundByBooth;
+  }
+
+  // 2. Check if it's an official Landmark (Food Court, Entrance, Registration, etc.)
+  const lm = resolveLandmark(clean);
   if (lm) {
     return { 
       name: lm.name, 
@@ -756,22 +798,15 @@ function resolveExhibitor(inputVal) {
     };
   }
 
-  const clean = typeof inputVal === 'object' ? (inputVal.booth || inputVal.name || '') : String(inputVal).trim();
-
-  // 2. Try matching company name (e.g. Kerry, Cargill, etc.)
+  // 3. Try matching company name (e.g. Kerry, Cargill, etc.)
   const lower = clean.toLowerCase();
   const foundByName = AppState.exhibitors.find(e => 
-    e.name.toLowerCase().includes(lower) || lower.includes(e.name.toLowerCase())
+    e.name.toLowerCase() === lower || e.name.toLowerCase().includes(lower)
   );
   if (foundByName) return foundByName;
 
-  // 3. Try extracting booth digits
-  const boothMatch = clean.match(/(?:booth\s*#?|#)?\s*(\d{2,5})/i);
-  if (boothMatch) {
-    const boothStr = boothMatch[1];
-    const foundByBooth = AppState.exhibitors.find(e => e.booth === boothStr);
-    if (foundByBooth) return foundByBooth;
-    return { name: `Exhibitor Booth #${boothStr}`, booth: boothStr };
+  if (cleanDigits) {
+    return { name: `Exhibitor Booth #${cleanDigits}`, booth: cleanDigits };
   }
 
   return null;
@@ -909,7 +944,42 @@ function checkCanvasHover(e) {
 function getExactBoothCoord(target) {
   if (!target) return null;
 
-  // 1. Check Landmark FIRST (by object, id, name, or keyword)
+  // 1. Check if target is explicitly marked as Landmark
+  if (typeof target === 'object' && target.isLandmark) {
+    const lm = target.landmark || resolveLandmark(target);
+    if (lm) {
+      const aisle_x = getAisleX(lm.aisle || 3500);
+      const booth_x = lm.x + lm.width / 2;
+      const booth_y = lm.y + lm.height / 2;
+      return {
+        isLandmark: true,
+        landmark: lm,
+        booth: lm.name,
+        name: lm.name,
+        aisle: lm.aisle || 3500,
+        pos: 50,
+        level: lm.level === 'both' ? '1' : lm.level,
+        aisle_x: aisle_x,
+        booth_x: booth_x,
+        booth_y: booth_y,
+        isEven: true
+      };
+    }
+  }
+
+  // 2. Check Exhibitor in boothsMap (by booth number) FIRST
+  let boothStr = '';
+  if (typeof target === 'object' && target.booth) {
+    boothStr = String(target.booth);
+  } else {
+    boothStr = String(target);
+  }
+  const cleanNum = extractBoothDigits(boothStr);
+  if (cleanNum && AppState.boothsMap.has(cleanNum)) {
+    return AppState.boothsMap.get(cleanNum);
+  }
+
+  // 3. Check Landmark by name/id (only if no booth number was found)
   const lm = resolveLandmark(target);
   if (lm) {
     const aisle_x = getAisleX(lm.aisle || 3500);
@@ -930,14 +1000,7 @@ function getExactBoothCoord(target) {
     };
   }
 
-  // 2. Check Exhibitor in boothsMap
-  const boothStr = (typeof target === 'object' && target.booth) ? target.booth : String(target);
-  const cleanNum = extractBoothNumber(boothStr);
-  if (AppState.boothsMap.has(cleanNum)) {
-    return AppState.boothsMap.get(cleanNum);
-  }
-
-  // 3. Fallback numeric aisle/pos
+  // 4. Fallback numeric aisle/pos
   const num = parseInt(cleanNum, 10);
   if (!isNaN(num)) {
     const aisle = Math.floor(num / 100) * 100;
