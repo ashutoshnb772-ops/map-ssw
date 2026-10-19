@@ -1012,86 +1012,147 @@ function calculateAndRenderRoute() {
 
   const startName = startEx.name;
   const destName = destEx.name;
-  const isMultiLevel = (startCoord.level !== destCoord.level);
+  const isStartEast = (startCoord.aisle >= 7000);
+  const isDestEast = (destCoord.aisle >= 7000);
+  const isInterHall = (isStartEast !== isDestEast);
+  const isMultiLevel = isInterHall;
 
   // 3. True Convention Pathfinding:
   const waypoints = [];
   const steps = [];
 
-  // Central Escalator Location at (x = 2200, y = 550) connecting Level 1 & Level 2
-  const escalatorPt = { x: 2200, y: 550 };
+  // Official Connector Foyer Transition Points (Connecting West Bayside & East Shoreline Halls)
+  const lobbyCPt = { x: 2180, y: 550 }; // Lobby C Exit on Central Concourse
+  const lobbyBPt = { x: 2215, y: 780 }; // Lobby B Entrance into Shoreline / Bayside A Hall
 
   let distanceFt = 0;
 
-  if (isMultiLevel) {
-    // MULTI-LEVEL ROUTING (e.g. Level 2 Shoreline -> Level 1 Bayside)
-    // Part 1: Start Booth -> Start Aisle -> Central Concourse -> Escalator Hub
-    waypoints.push({ x: startCoord.booth_x, y: startCoord.booth_y });
-    waypoints.push({ x: startCoord.aisle_x, y: startCoord.booth_y });
-    waypoints.push({ x: startCoord.aisle_x, y: 550 }); // Central Concourse on start floor
-    waypoints.push({ x: escalatorPt.x, y: 550 });      // Arrive at Escalator Hub
+  if (isInterHall) {
+    if (!isStartEast && isDestEast) {
+      // WEST HALL (e.g. Booth 2120) TO EAST HALL (e.g. Booth 7776)
+      // 1. Depart booth into start aisle walkway
+      waypoints.push({ x: startCoord.booth_x, y: startCoord.booth_y });
+      waypoints.push({ x: startCoord.aisle_x, y: startCoord.booth_y });
+      // 2. Walk to Central Cross-Concourse (y = 550)
+      waypoints.push({ x: startCoord.aisle_x, y: 550 });
+      // 3. Walk East along Central Concourse to Lobby C
+      waypoints.push({ x: lobbyCPt.x, y: 550 });
+      // 4. Walk South down Connector Concourse (New Products Zone) toward Lobby B
+      waypoints.push({ x: lobbyCPt.x, y: lobbyBPt.y });
+      waypoints.push({ x: lobbyBPt.x, y: lobbyBPt.y });
+      // 5. Turn East into East Hall concourse toward destination aisle
+      waypoints.push({ x: destCoord.aisle_x, y: lobbyBPt.y });
+      // 6. Proceed down destination aisle to booth
+      waypoints.push({ x: destCoord.aisle_x, y: destCoord.booth_y });
+      waypoints.push({ x: destCoord.booth_x, y: destCoord.booth_y });
 
-    // Part 2: Escalator Transition Point (Level Change)
-    // Part 3: From Escalator Hub on Dest Floor -> Dest Aisle -> Dest Booth
-    waypoints.push({ x: destCoord.aisle_x, y: 550 });
-    waypoints.push({ x: destCoord.aisle_x, y: destCoord.booth_y });
-    waypoints.push({ x: destCoord.booth_x, y: destCoord.booth_y });
+      // Turn-by-Turn Steps matching official ExpoFP routing
+      const startTag = startCoord.isLandmark ? '' : ` (Booth #${startCoord.booth})`;
+      steps.push({
+        icon: 'fa-solid fa-location-dot',
+        text: `Start at <strong>${escapeHtml(startName)}</strong>${startTag}.`,
+        subtext: `Located in Bayside Main Hall &bull; Near Aisle ${startCoord.aisle}`
+      });
 
-    // Calculate real feet including escalator ride
-    const dist1 = (Math.abs(startCoord.booth_y - 550) + Math.abs(startCoord.aisle_x - escalatorPt.x)) * 0.45;
-    const dist2 = (Math.abs(destCoord.aisle_x - escalatorPt.x) + Math.abs(destCoord.booth_y - 550)) * 0.45;
-    distanceFt = Math.round(dist1 + dist2 + 65); // 65ft for escalator traversal
+      steps.push({
+        icon: 'fa-solid fa-arrow-up',
+        text: `Walk along <strong>Aisle ${startCoord.aisle}</strong> toward the Central Cross-Concourse.`,
+        subtext: `Proceed to main aisle junction`
+      });
 
-    // Accurate Turn-by-Turn Steps
-    const startTag = startCoord.isLandmark ? '' : ` (Booth #${startCoord.booth})`;
-    steps.push({
-      icon: 'fa-solid fa-location-dot',
-      text: `Start at <strong>${escapeHtml(startName)}</strong>${startTag}.`,
-      subtext: `Located on Level ${startCoord.level} (${startCoord.level === '2' ? 'Shoreline Exhibit Hall' : 'Bayside Hall'})`
-    });
+      steps.push({
+        icon: 'fa-solid fa-arrow-right',
+        text: `Turn <strong>East (Right)</strong> onto <strong>Central Concourse</strong> toward Lobby C.`,
+        subtext: `Follow main concourse corridor toward east exit`
+      });
 
-    steps.push({
-      icon: 'fa-solid fa-arrow-up',
-      text: `Walk along <strong>Aisle ${startCoord.aisle}</strong> toward the Central Cross-Concourse.`,
-      subtext: `~${Math.round(Math.abs(startCoord.booth_y - 550) * 0.45)} ft`
-    });
+      steps.push({
+        icon: 'fa-solid fa-arrow-turn-down',
+        text: `Turn <strong>South (Right)</strong> into the <strong>Connector Concourse (New Products Zone)</strong>.`,
+        subtext: `Walk through connector breezeway from Lobby C to Lobby B`
+      });
 
-    steps.push({
-      icon: 'fa-solid fa-arrow-right',
-      text: `Proceed along Concourse toward the <strong>Shoreline Grand Escalators</strong>.`,
-      subtext: `Follow overhead signage toward Level ${destCoord.level}`
-    });
+      steps.push({
+        icon: 'fa-solid fa-arrow-turn-right',
+        text: `Turn <strong>East (Left)</strong> at <strong>Lobby B</strong> into <strong>Shoreline / Bayside A Hall</strong>.`,
+        subtext: `Enter East exhibit hall through Lobby B foyer`
+      });
 
-    const escalatorDirection = destCoord.level === '1' ? 'DOWN to Level 1 (Bayside Hall)' : 'UP to Level 2 (Shoreline Hall)';
-    steps.push({
-      icon: 'fa-solid fa-stairs',
-      text: `🪜 <strong>Take the Escalator ${escalatorDirection}</strong>.`,
-      subtext: `Floor Transition: Level ${startCoord.level} ➔ Level ${destCoord.level}`
-    });
+      const destWalkTarget = destCoord.isLandmark ? destName : `Booth #${destCoord.booth}`;
+      steps.push({
+        icon: 'fa-solid fa-diamond-turn-right',
+        text: `Proceed along <strong>Aisle ${destCoord.aisle}</strong> toward ${destWalkTarget}.`,
+        subtext: `Walk down designated aisle`
+      });
 
-    const destWalkTarget = destCoord.isLandmark ? destName : `Booth #${destCoord.booth}`;
-    steps.push({
-      icon: 'fa-solid fa-diamond-turn-right',
-      text: `Turn into <strong>Aisle ${destCoord.aisle}</strong> and walk toward ${destWalkTarget}.`,
-      subtext: `~${Math.round(Math.abs(destCoord.booth_y - 550) * 0.45)} ft on Level ${destCoord.level}`
-    });
+      const destTag = destCoord.isLandmark ? '' : ` (Booth #${destCoord.booth})`;
+      steps.push({
+        icon: 'fa-solid fa-flag-checkered',
+        text: `Arrive at destination: <strong>${escapeHtml(destName)}</strong>${destTag}.`,
+        subtext: `Destination reached on your ${destCoord.isEven ? 'right' : 'left'}`
+      });
 
-    const destTag = destCoord.isLandmark ? '' : ` (Booth #${destCoord.booth})`;
-    steps.push({
-      icon: 'fa-solid fa-flag-checkered',
-      text: `Arrive at destination: <strong>${escapeHtml(destName)}</strong>${destTag}.`,
-      subtext: destCoord.isLandmark 
-        ? `Located on Level ${destCoord.level} near Aisle ${destCoord.aisle}` 
-        : `Destination on your ${destCoord.isEven ? 'right' : 'left'}`
-    });
+    } else {
+      // EAST HALL (e.g. Booth 7776) TO WEST HALL (e.g. Booth 2120)
+      waypoints.push({ x: startCoord.booth_x, y: startCoord.booth_y });
+      waypoints.push({ x: startCoord.aisle_x, y: startCoord.booth_y });
+      waypoints.push({ x: startCoord.aisle_x, y: lobbyBPt.y });
+      waypoints.push({ x: lobbyBPt.x, y: lobbyBPt.y });
+      waypoints.push({ x: lobbyCPt.x, y: lobbyBPt.y });
+      waypoints.push({ x: lobbyCPt.x, y: 550 });
+      waypoints.push({ x: destCoord.aisle_x, y: 550 });
+      waypoints.push({ x: destCoord.aisle_x, y: destCoord.booth_y });
+      waypoints.push({ x: destCoord.booth_x, y: destCoord.booth_y });
+
+      const startTag = startCoord.isLandmark ? '' : ` (Booth #${startCoord.booth})`;
+      steps.push({
+        icon: 'fa-solid fa-location-dot',
+        text: `Start at <strong>${escapeHtml(startName)}</strong>${startTag}.`,
+        subtext: `Located in Shoreline / Bayside A Hall &bull; Near Aisle ${startCoord.aisle}`
+      });
+
+      steps.push({
+        icon: 'fa-solid fa-arrow-left',
+        text: `Walk toward <strong>Lobby B Exit</strong>.`,
+        subtext: `Proceed west toward connector foyer`
+      });
+
+      steps.push({
+        icon: 'fa-solid fa-arrow-turn-up',
+        text: `Turn <strong>North</strong> through the <strong>Connector Concourse (New Products Zone)</strong> toward Lobby C.`,
+        subtext: `Transition corridor between halls`
+      });
+
+      steps.push({
+        icon: 'fa-solid fa-arrow-left',
+        text: `Turn <strong>West (Left)</strong> onto <strong>Central Concourse</strong> into Bayside Main Hall.`,
+        subtext: `Proceed west along Central Concourse toward Aisle ${destCoord.aisle}`
+      });
+
+      const destWalkTarget = destCoord.isLandmark ? destName : `Booth #${destCoord.booth}`;
+      steps.push({
+        icon: 'fa-solid fa-diamond-turn-right',
+        text: `Turn into <strong>Aisle ${destCoord.aisle}</strong> and proceed toward ${destWalkTarget}.`,
+        subtext: `Destination on your ${destCoord.isEven ? 'right' : 'left'}`
+      });
+
+      const destTag = destCoord.isLandmark ? '' : ` (Booth #${destCoord.booth})`;
+      steps.push({
+        icon: 'fa-solid fa-flag-checkered',
+        text: `Arrive at destination: <strong>${escapeHtml(destName)}</strong>${destTag}.`,
+        subtext: `Destination reached in Bayside Main Hall`
+      });
+    }
 
   } else {
-    // SAME-LEVEL ROUTING
-    const concourses = [
-      { y: 150, name: 'North Concourse' },
-      { y: 550, name: 'Central Concourse' },
-      { y: 920, name: 'South Concourse' }
-    ];
+    // SAME-HALL ROUTING (Within West Hall or Within East Hall)
+    const concourses = isStartEast
+      ? [{ y: 550, name: 'North Concourse' }, { y: 780, name: 'Central Concourse' }, { y: 920, name: 'South Concourse' }]
+      : [
+          { y: 150, name: 'North Concourse' },
+          { y: 550, name: 'Central Concourse' },
+          { y: 920, name: 'South Concourse' }
+        ];
 
     let bestConcourse = concourses[1];
     let minWalkDistance = Infinity;
@@ -1111,10 +1172,6 @@ function calculateAndRenderRoute() {
     waypoints.push({ x: destCoord.aisle_x, y: destCoord.booth_y });
     waypoints.push({ x: destCoord.booth_x, y: destCoord.booth_y });
 
-    const aisleDistance = Math.abs(destCoord.aisle_x - startCoord.aisle_x) * 0.45;
-    const verticalDistance = (Math.abs(startCoord.booth_y - bestConcourse.y) + Math.abs(destCoord.booth_y - bestConcourse.y)) * 0.45;
-    distanceFt = Math.max(45, Math.round(aisleDistance + verticalDistance + 25));
-
     const startTag = startCoord.isLandmark ? '' : ` (Booth #${startCoord.booth})`;
     steps.push({
       icon: 'fa-solid fa-location-dot',
@@ -1122,7 +1179,7 @@ function calculateAndRenderRoute() {
       subtext: `Level ${startCoord.level} &bull; Near Aisle ${startCoord.aisle}`
     });
 
-    const distToConcourse = Math.round(Math.abs(startCoord.booth_y - bestConcourse.y) * 0.45);
+    const distToConcourse = Math.round(Math.abs(startCoord.booth_y - bestConcourse.y) * 0.786);
     const walkDir = bestConcourse.y > startCoord.booth_y ? 'South' : 'North';
     steps.push({
       icon: walkDir === 'South' ? 'fa-solid fa-arrow-down' : 'fa-solid fa-arrow-up',
@@ -1135,14 +1192,14 @@ function calculateAndRenderRoute() {
       steps.push({
         icon: turnConcourse === 'Right' ? 'fa-solid fa-arrow-turn-right' : 'fa-solid fa-arrow-turn-left',
         text: `Turn <strong>${turnConcourse}</strong> onto <strong>${bestConcourse.name}</strong> toward Aisle ${destCoord.aisle}.`,
-        subtext: `Walk along designated concourse corridor (~${Math.round(aisleDistance)} ft)`
+        subtext: `Walk along designated concourse corridor`
       });
 
       const destWalkTarget = destCoord.isLandmark ? destName : `Booth #${destCoord.booth}`;
       steps.push({
         icon: 'fa-solid fa-diamond-turn-right',
         text: `Turn into <strong>Aisle ${destCoord.aisle}</strong> and proceed toward ${destWalkTarget}.`,
-        subtext: `~${Math.round(Math.abs(destCoord.booth_y - bestConcourse.y) * 0.45)} ft`
+        subtext: `~${Math.round(Math.abs(destCoord.booth_y - bestConcourse.y) * 0.786)} ft`
       });
     }
 
@@ -1156,8 +1213,14 @@ function calculateAndRenderRoute() {
     });
   }
 
-  // Time calculation
-  const totalSeconds = Math.round(distanceFt / 3.3);
+  // Calculate Accurate Physical Convention Feet & Real Walking Time
+  let totalLengthPx = 0;
+  for (let i = 1; i < waypoints.length; i++) {
+    totalLengthPx += Math.hypot(waypoints[i].x - waypoints[i-1].x, waypoints[i].y - waypoints[i-1].y);
+  }
+  const FEET_PER_PX = 0.786;
+  distanceFt = Math.round(totalLengthPx * FEET_PER_PX);
+  const totalSeconds = Math.round(distanceFt / 4.2);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   const timeFormatted = minutes > 0 ? `${minutes} min ${seconds > 0 ? seconds + 's' : ''}` : `${seconds}s`;
@@ -1314,6 +1377,30 @@ function drawCanvasMap() {
   ctx.font = '700 14px Outfit, sans-serif';
   ctx.textAlign = 'left';
   ctx.fillText('LEVEL 2: SHORELINE EXHIBIT HALL', 2300, 74);
+
+  // 1.5 Draw Connecting Concourse (New Products Zone & Lobby C ⇄ Lobby B Breezeway)
+  ctx.fillStyle = 'rgba(16, 185, 129, 0.08)';
+  ctx.strokeStyle = 'rgba(16, 185, 129, 0.35)';
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, 2160, 520, 110, 290, 8, true, true);
+
+  ctx.fillStyle = '#34d399';
+  ctx.font = '700 10px Outfit, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('CONNECTOR FOYER', 2215, 640);
+  ctx.font = '500 9px Inter, sans-serif';
+  ctx.fillText('New Products Zone', 2215, 656);
+  ctx.fillText('Lobby C ⇄ Lobby B', 2215, 670);
+
+  // Lobby C Label
+  ctx.fillStyle = '#38bdf8';
+  ctx.font = '700 11px Outfit, sans-serif';
+  ctx.fillText('LOBBY C', 2180, 512);
+
+  // Lobby B Label
+  ctx.fillStyle = '#fb923c';
+  ctx.font = '700 11px Outfit, sans-serif';
+  ctx.fillText('LOBBY B', 2215, 830);
 
   // 2. Draw Walkable Cross-Concourses
   HallModel.crossConcourses.forEach(cc => {
