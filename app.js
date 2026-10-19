@@ -149,16 +149,176 @@ const HallModel = {
     { name: 'South Concourse', y: 920 }
   ],
   
-  // Realistic Hubs & Escalators
+  // Realistic Hubs, Entrances, Dining & Stages
   landmarks: [
-    { name: 'Main Bayside Entrance', x: 580, y: 980, width: 220, height: 60, icon: 'fa-door-open', type: 'entrance', level: '1' },
-    { name: 'Registration Lobby', x: 840, y: 980, width: 260, height: 60, icon: 'fa-id-card', type: 'service', level: '1' },
-    { name: 'Central Food Court', x: 1380, y: 500, width: 260, height: 100, icon: 'fa-utensils', type: 'amenity', level: '1' },
-    { name: 'Main Innovation Stage', x: 1980, y: 90, width: 280, height: 85, icon: 'fa-microphone', type: 'stage', level: '1' },
-    // THE ESCALATOR HUB CONNECTING LEVEL 1 & LEVEL 2
-    { name: '🪜 Grand Escalators (Level 1 ⇄ Level 2)', x: 2220, y: 500, width: 140, height: 100, icon: 'fa-stairs', type: 'escalator', level: 'both' },
-    { name: 'Shoreline Lobby (Level 2)', x: 2450, y: 980, width: 240, height: 60, icon: 'fa-door-open', type: 'entrance', level: '2' },
-    { name: 'Zen Den & Education (LL)', x: 2150, y: 980, width: 200, height: 60, icon: 'fa-spa', type: 'amenity', level: 'll' }
+    { 
+      id: 'bayside-main-entrance',
+      name: 'Bayside Main Entrance', 
+      shortName: 'Main Entrance',
+      aisle: 3500,
+      x: 1060, 
+      y: 970, 
+      width: 200, 
+      height: 55, 
+      icon: 'fa-door-open', 
+      type: 'entrance', 
+      level: '1',
+      aliases: ['main entrance', 'entrance', 'bayside entrance', 'entry', 'doors', 'front entrance', 'lobby entrance', 'main doors']
+    },
+    { 
+      id: 'bayside-registration-lobby',
+      name: 'Bayside Registration Lobby', 
+      shortName: 'Registration Lobby',
+      aisle: 3500,
+      x: 1030, 
+      y: 1035, 
+      width: 260, 
+      height: 50, 
+      icon: 'fa-id-card', 
+      type: 'service', 
+      level: '1',
+      aliases: ['registration', 'registration lobby', 'bayside registration', 'badge pickup', 'check-in', 'badge', 'badges']
+    },
+    { 
+      id: 'main-food-court',
+      name: 'Main Food Court & Dining Pavilion', 
+      shortName: 'Food Court',
+      aisle: 6000,
+      x: 1820, 
+      y: 840, 
+      width: 280, 
+      height: 130, 
+      icon: 'fa-utensils', 
+      type: 'amenity', 
+      level: '1',
+      aliases: ['food court', 'food', 'dining', 'lunch', 'restaurant', 'dining pavilion', 'cafeteria', 'eat', 'eats', 'meals', 'dining area']
+    },
+    { 
+      id: 'south-concessions-cafe',
+      name: 'South Concessions & Cafe', 
+      shortName: 'South Cafe',
+      aisle: 3200,
+      x: 920, 
+      y: 870, 
+      width: 140, 
+      height: 90, 
+      icon: 'fa-coffee', 
+      type: 'amenity', 
+      level: '1',
+      aliases: ['cafe', 'coffee', 'south concessions', 'concessions', 'snack', 'drinks', 'beverages', 'south cafe']
+    },
+    { 
+      id: 'first-time-showcase',
+      name: 'First-Time Exhibitor Showcase', 
+      shortName: 'New Exhibitors',
+      aisle: 4100,
+      x: 1210, 
+      y: 75, 
+      width: 220, 
+      height: 75, 
+      icon: 'fa-star', 
+      type: 'stage', 
+      level: '1',
+      aliases: ['first-time exhibitor showcase', 'first time showcase', 'first time', 'showcase', 'new exhibitors', 'first-time']
+    },
+    { 
+      id: 'main-innovation-stage',
+      name: 'Main Innovation Stage', 
+      shortName: 'Innovation Stage',
+      aisle: 6400,
+      x: 1980, 
+      y: 75, 
+      width: 200, 
+      height: 75, 
+      icon: 'fa-microphone', 
+      type: 'stage', 
+      level: '1',
+      aliases: ['main stage', 'innovation stage', 'stage', 'keynote', 'speaker stage', 'presentations', 'main innovation stage']
+    },
+    { 
+      id: 'grand-escalators',
+      name: '🪜 Grand Escalators (Level 1 ⇄ Level 2)', 
+      shortName: 'Grand Escalators',
+      aisle: 6900,
+      x: 2200, 
+      y: 500, 
+      width: 130, 
+      height: 95, 
+      icon: 'fa-stairs', 
+      type: 'escalator', 
+      level: 'both',
+      aliases: ['escalator', 'grand escalators', 'escalators', 'stairs', 'level change', 'to shoreline', 'to bayside', 'elevator']
+    },
+    { 
+      id: 'shoreline-innovation-pavilion',
+      name: 'Shoreline Innovation Pavilion', 
+      shortName: 'Shoreline Stage',
+      aisle: 7600,
+      x: 2430, 
+      y: 350, 
+      width: 170, 
+      height: 110, 
+      icon: 'fa-lightbulb', 
+      type: 'stage', 
+      level: '2',
+      aliases: ['shoreline innovation pavilion', 'shoreline stage', 'level 2 stage', 'shoreline pavilion']
+    },
+    { 
+      id: 'shoreline-concessions',
+      name: 'Shoreline Concessions & Lounge', 
+      shortName: 'Shoreline Lounge',
+      aisle: 8000,
+      x: 2580, 
+      y: 860, 
+      width: 150, 
+      height: 90, 
+      icon: 'fa-utensils', 
+      type: 'amenity', 
+      level: '2',
+      aliases: ['shoreline concessions', 'shoreline food', 'shoreline dining', 'shoreline cafe', 'shoreline lounge']
+    },
+    { 
+      id: 'shoreline-registration-info',
+      name: 'Shoreline Registration & Information', 
+      shortName: 'Shoreline Info',
+      aisle: 7100,
+      x: 2380, 
+      y: 1000, 
+      width: 240, 
+      height: 50, 
+      icon: 'fa-circle-info', 
+      type: 'service', 
+      level: '2',
+      aliases: ['shoreline registration', 'shoreline info', 'information desk', 'help desk', 'customer service']
+    },
+    { 
+      id: 'bayside-restrooms-west',
+      name: 'Bayside West Restrooms', 
+      shortName: 'Restrooms (West)',
+      aisle: 2800,
+      x: 790, 
+      y: 970, 
+      width: 120, 
+      height: 55, 
+      icon: 'fa-restroom', 
+      type: 'restroom', 
+      level: '1',
+      aliases: ['restroom', 'bathroom', 'toilets', 'washroom', 'wc', 'bayside restrooms']
+    },
+    { 
+      id: 'bayside-restrooms-east',
+      name: 'Bayside East Restrooms (Food Court)', 
+      shortName: 'Restrooms (East)',
+      aisle: 6500,
+      x: 2130, 
+      y: 870, 
+      width: 120, 
+      height: 60, 
+      icon: 'fa-restroom', 
+      type: 'restroom', 
+      level: '1',
+      aliases: ['east restrooms', 'food court restroom', 'dining restroom']
+    }
   ]
 };
 
@@ -343,14 +503,14 @@ function setupEventListeners() {
   // Start & Dest Autocomplete
   setupAutocomplete(DOM.startInput, DOM.startSuggestions, DOM.clearStartBtn, (item) => {
     AppState.startLocation = item;
-    DOM.startInput.value = `${item.name} (Booth #${item.booth})`;
+    DOM.startInput.value = item.isLandmark ? item.name : `${item.name} (Booth #${item.booth})`;
     DOM.startSuggestions.style.display = 'none';
     calculateAndRenderRoute();
   });
 
   setupAutocomplete(DOM.destInput, DOM.destSuggestions, DOM.clearDestBtn, (item) => {
     AppState.destLocation = item;
-    DOM.destInput.value = `${item.name} (Booth #${item.booth})`;
+    DOM.destInput.value = item.isLandmark ? item.name : `${item.name} (Booth #${item.booth})`;
     DOM.destSuggestions.style.display = 'none';
     calculateAndRenderRoute();
   });
@@ -392,14 +552,15 @@ function setupEventListeners() {
   // Quick Landmark Chips
   document.querySelectorAll('.chip-btn').forEach(chip => {
     chip.addEventListener('click', () => {
-      const landmark = chip.dataset.loc;
-      const booth = chip.dataset.booth;
-      const item = { name: landmark, booth: booth };
-      AppState.startLocation = item;
-      DOM.startInput.value = `${landmark} (Aisle #${booth})`;
-      DOM.clearStartBtn.style.display = 'block';
-      showToast(`Current location set to ${landmark}`);
-      calculateAndRenderRoute();
+      const landmarkName = chip.dataset.loc;
+      const lm = resolveLandmark(landmarkName);
+      if (lm) {
+        AppState.startLocation = { name: lm.name, booth: lm.name, isLandmark: true, landmark: lm };
+        DOM.startInput.value = lm.name;
+        DOM.clearStartBtn.style.display = 'block';
+        showToast(`Current location set to ${lm.shortName}`);
+        calculateAndRenderRoute();
+      }
     });
   });
 
@@ -530,13 +691,81 @@ function setupEventListeners() {
 }
 
 /**
- * Resolve input string to exact Exhibitor object
+ * Resolve input string or object to matching Landmark
+ */
+function resolveLandmark(inputVal) {
+  if (!inputVal) return null;
+  if (typeof inputVal === 'object') {
+    if (inputVal.isLandmark && inputVal.landmark) return inputVal.landmark;
+    if (inputVal.name) inputVal = inputVal.name;
+    else if (inputVal.booth) inputVal = inputVal.booth;
+    else return null;
+  }
+  
+  const raw = String(inputVal).trim().toLowerCase();
+  if (!raw) return null;
+
+  // 1. Direct exact id match or name match
+  for (const lm of HallModel.landmarks) {
+    if (lm.id === raw || lm.name.toLowerCase() === raw || lm.shortName.toLowerCase() === raw) {
+      return lm;
+    }
+  }
+
+  // 2. Keyword / alias match
+  for (const lm of HallModel.landmarks) {
+    if (lm.aliases) {
+      for (const alias of lm.aliases) {
+        if (raw === alias || raw.includes(alias)) {
+          return lm;
+        }
+      }
+    }
+  }
+
+  // 3. Raw string contains full landmark name or landmark name contains raw
+  for (const lm of HallModel.landmarks) {
+    const lName = lm.name.toLowerCase();
+    const lShort = lm.shortName.toLowerCase();
+    if (raw.includes(lName) || lName.includes(raw) || raw.includes(lShort) || lShort.includes(raw)) {
+      return lm;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Resolve input string or object to exact Location / Exhibitor object
  */
 function resolveExhibitor(inputVal) {
   if (!inputVal) return null;
-  const clean = inputVal.trim();
+  if (typeof inputVal === 'object' && inputVal.isLandmark) {
+    return inputVal;
+  }
 
-  // 1. Try extracting booth digits
+  // 1. Priority: check if it's an official Landmark (Food Court, Entrance, Registration, etc.)
+  const lm = resolveLandmark(inputVal);
+  if (lm) {
+    return { 
+      name: lm.name, 
+      booth: lm.name, 
+      isLandmark: true, 
+      landmark: lm, 
+      level: lm.level === 'both' ? '1' : lm.level 
+    };
+  }
+
+  const clean = typeof inputVal === 'object' ? (inputVal.booth || inputVal.name || '') : String(inputVal).trim();
+
+  // 2. Try matching company name (e.g. Kerry, Cargill, etc.)
+  const lower = clean.toLowerCase();
+  const foundByName = AppState.exhibitors.find(e => 
+    e.name.toLowerCase().includes(lower) || lower.includes(e.name.toLowerCase())
+  );
+  if (foundByName) return foundByName;
+
+  // 3. Try extracting booth digits
   const boothMatch = clean.match(/(?:booth\s*#?|#)?\s*(\d{2,5})/i);
   if (boothMatch) {
     const boothStr = boothMatch[1];
@@ -544,17 +773,6 @@ function resolveExhibitor(inputVal) {
     if (foundByBooth) return foundByBooth;
     return { name: `Exhibitor Booth #${boothStr}`, booth: boothStr };
   }
-
-  // 2. Try matching company name
-  const lower = clean.toLowerCase();
-  const foundByName = AppState.exhibitors.find(e => 
-    e.name.toLowerCase().includes(lower) || lower.includes(e.name.toLowerCase())
-  );
-  if (foundByName) return foundByName;
-
-  // 3. Match landmarks
-  const lm = HallModel.landmarks.find(l => lower.includes(l.name.toLowerCase()));
-  if (lm) return { name: lm.name, booth: lm.booth };
 
   return null;
 }
@@ -614,7 +832,7 @@ function zoomCanvas(factor) {
 }
 
 /**
- * Check which booth is hovered by mouse
+ * Check which booth or landmark is hovered by mouse
  */
 function checkCanvasHover(e) {
   const rect = DOM.mapCanvas.getBoundingClientRect();
@@ -650,6 +868,22 @@ function checkCanvasHover(e) {
     }
   }
 
+  // Check if hovering over any landmark rectangle
+  if (!found) {
+    for (const lm of HallModel.landmarks) {
+      if (worldX >= lm.x && worldX <= lm.x + lm.width && worldY >= lm.y && worldY <= lm.y + lm.height) {
+        found = {
+          booth: lm.name,
+          name: `${lm.name} (Level ${lm.level === 'both' ? '1-2' : lm.level})`,
+          x: lm.x + lm.width / 2,
+          y: lm.y + lm.height / 2,
+          isLandmark: true
+        };
+        break;
+      }
+    }
+  }
+
   if (!found) {
     for (const [boothNum, data] of AppState.boothsMap.entries()) {
       const d = Math.hypot(worldX - data.booth_x, worldY - data.booth_y);
@@ -670,14 +904,40 @@ function checkCanvasHover(e) {
 }
 
 /**
- * Get Exact World Coordinate for any Booth
+ * Get Exact World Coordinate for any Booth or Landmark
  */
-function getExactBoothCoord(boothStr) {
+function getExactBoothCoord(target) {
+  if (!target) return null;
+
+  // 1. Check Landmark FIRST (by object, id, name, or keyword)
+  const lm = resolveLandmark(target);
+  if (lm) {
+    const aisle_x = getAisleX(lm.aisle || 3500);
+    const booth_x = lm.x + lm.width / 2;
+    const booth_y = lm.y + lm.height / 2;
+    return {
+      isLandmark: true,
+      landmark: lm,
+      booth: lm.name,
+      name: lm.name,
+      aisle: lm.aisle || 3500,
+      pos: 50,
+      level: lm.level === 'both' ? '1' : lm.level,
+      aisle_x: aisle_x,
+      booth_x: booth_x,
+      booth_y: booth_y,
+      isEven: true
+    };
+  }
+
+  // 2. Check Exhibitor in boothsMap
+  const boothStr = (typeof target === 'object' && target.booth) ? target.booth : String(target);
   const cleanNum = extractBoothNumber(boothStr);
   if (AppState.boothsMap.has(cleanNum)) {
     return AppState.boothsMap.get(cleanNum);
   }
 
+  // 3. Fallback numeric aisle/pos
   const num = parseInt(cleanNum, 10);
   if (!isNaN(num)) {
     const aisle = Math.floor(num / 100) * 100;
@@ -697,21 +957,6 @@ function getExactBoothCoord(boothStr) {
       booth_x,
       booth_y,
       isEven
-    };
-  }
-
-  const lm = HallModel.landmarks.find(l => boothStr.toLowerCase().includes(l.name.toLowerCase()));
-  if (lm) {
-    return {
-      booth: lm.booth,
-      name: lm.name,
-      aisle: parseInt(lm.booth, 10) || 1800,
-      pos: 50,
-      level: lm.level,
-      aisle_x: lm.x + lm.width / 2,
-      booth_x: lm.x + lm.width / 2,
-      booth_y: lm.y + lm.height / 2,
-      isEven: true
     };
   }
 
@@ -757,11 +1002,11 @@ function calculateAndRenderRoute() {
   AppState.destLocation = destEx;
 
   // 2. Get Exact Coordinates & Levels
-  const startCoord = getExactBoothCoord(startEx.booth);
-  const destCoord = getExactBoothCoord(destEx.booth);
+  const startCoord = getExactBoothCoord(startEx);
+  const destCoord = getExactBoothCoord(destEx);
 
   if (!startCoord || !destCoord) {
-    showToast('Could not resolve booth location on the floor plan.');
+    showToast('Could not resolve location on the floor plan.');
     return;
   }
 
@@ -773,26 +1018,14 @@ function calculateAndRenderRoute() {
   const waypoints = [];
   const steps = [];
 
-  // Central Escalator Location at (x = 2290, y = 550) connecting Level 1 & Level 2
-  const escalatorPt = { x: 2280, y: 550 };
-
-  // Obstacle avoidance for Central Food Court (x: 1380 to 1640, y: 500 to 600)
-  function bypassFoodCourt(x1, x2, concourseY) {
-    // If path crosses the food court (x between 1350 and 1660 and concourse is Central y=550), route around it!
-    if (concourseY === 550 && Math.min(x1, x2) < 1640 && Math.max(x1, x2) > 1380) {
-      return [
-        { x: (x1 < x2 ? 1360 : 1660), y: 460 }, // bypass top of food court corridor
-        { x: (x1 < x2 ? 1660 : 1360), y: 460 }
-      ];
-    }
-    return [];
-  }
+  // Central Escalator Location at (x = 2200, y = 550) connecting Level 1 & Level 2
+  const escalatorPt = { x: 2200, y: 550 };
 
   let distanceFt = 0;
 
   if (isMultiLevel) {
     // MULTI-LEVEL ROUTING (e.g. Level 2 Shoreline -> Level 1 Bayside)
-    // Part 1: Start Booth -> Start Aisle -> Escalator Hub
+    // Part 1: Start Booth -> Start Aisle -> Central Concourse -> Escalator Hub
     waypoints.push({ x: startCoord.booth_x, y: startCoord.booth_y });
     waypoints.push({ x: startCoord.aisle_x, y: startCoord.booth_y });
     waypoints.push({ x: startCoord.aisle_x, y: 550 }); // Central Concourse on start floor
@@ -800,9 +1033,6 @@ function calculateAndRenderRoute() {
 
     // Part 2: Escalator Transition Point (Level Change)
     // Part 3: From Escalator Hub on Dest Floor -> Dest Aisle -> Dest Booth
-    const bypass = bypassFoodCourt(escalatorPt.x, destCoord.aisle_x, 550);
-    bypass.forEach(bp => waypoints.push(bp));
-
     waypoints.push({ x: destCoord.aisle_x, y: 550 });
     waypoints.push({ x: destCoord.aisle_x, y: destCoord.booth_y });
     waypoints.push({ x: destCoord.booth_x, y: destCoord.booth_y });
@@ -813,9 +1043,10 @@ function calculateAndRenderRoute() {
     distanceFt = Math.round(dist1 + dist2 + 65); // 65ft for escalator traversal
 
     // Accurate Turn-by-Turn Steps
+    const startTag = startCoord.isLandmark ? '' : ` (Booth #${startCoord.booth})`;
     steps.push({
       icon: 'fa-solid fa-location-dot',
-      text: `Start at <strong>${escapeHtml(startName)}</strong> (Booth #${startCoord.booth}).`,
+      text: `Start at <strong>${escapeHtml(startName)}</strong>${startTag}.`,
       subtext: `Located on Level ${startCoord.level} (${startCoord.level === '2' ? 'Shoreline Exhibit Hall' : 'Bayside Hall'})`
     });
 
@@ -838,16 +1069,20 @@ function calculateAndRenderRoute() {
       subtext: `Floor Transition: Level ${startCoord.level} ➔ Level ${destCoord.level}`
     });
 
+    const destWalkTarget = destCoord.isLandmark ? destName : `Booth #${destCoord.booth}`;
     steps.push({
       icon: 'fa-solid fa-diamond-turn-right',
-      text: `Turn into <strong>Aisle ${destCoord.aisle}</strong> and walk toward Booth #${destCoord.booth}.`,
+      text: `Turn into <strong>Aisle ${destCoord.aisle}</strong> and walk toward ${destWalkTarget}.`,
       subtext: `~${Math.round(Math.abs(destCoord.booth_y - 550) * 0.45)} ft on Level ${destCoord.level}`
     });
 
+    const destTag = destCoord.isLandmark ? '' : ` (Booth #${destCoord.booth})`;
     steps.push({
       icon: 'fa-solid fa-flag-checkered',
-      text: `Arrive at destination: <strong>${escapeHtml(destName)}</strong> (Booth #${destCoord.booth}).`,
-      subtext: `Destination on your ${destCoord.isEven ? 'right' : 'left'}`
+      text: `Arrive at destination: <strong>${escapeHtml(destName)}</strong>${destTag}.`,
+      subtext: destCoord.isLandmark 
+        ? `Located on Level ${destCoord.level} near Aisle ${destCoord.aisle}` 
+        : `Destination on your ${destCoord.isEven ? 'right' : 'left'}`
     });
 
   } else {
@@ -872,11 +1107,6 @@ function calculateAndRenderRoute() {
     waypoints.push({ x: startCoord.booth_x, y: startCoord.booth_y });
     waypoints.push({ x: startCoord.aisle_x, y: startCoord.booth_y });
     waypoints.push({ x: startCoord.aisle_x, y: bestConcourse.y });
-
-    // Avoid walking through food court
-    const bypass = bypassFoodCourt(startCoord.aisle_x, destCoord.aisle_x, bestConcourse.y);
-    bypass.forEach(bp => waypoints.push(bp));
-
     waypoints.push({ x: destCoord.aisle_x, y: bestConcourse.y });
     waypoints.push({ x: destCoord.aisle_x, y: destCoord.booth_y });
     waypoints.push({ x: destCoord.booth_x, y: destCoord.booth_y });
@@ -885,10 +1115,11 @@ function calculateAndRenderRoute() {
     const verticalDistance = (Math.abs(startCoord.booth_y - bestConcourse.y) + Math.abs(destCoord.booth_y - bestConcourse.y)) * 0.45;
     distanceFt = Math.max(45, Math.round(aisleDistance + verticalDistance + 25));
 
+    const startTag = startCoord.isLandmark ? '' : ` (Booth #${startCoord.booth})`;
     steps.push({
       icon: 'fa-solid fa-location-dot',
-      text: `Start at <strong>${escapeHtml(startName)}</strong> (Booth #${startCoord.booth}).`,
-      subtext: `Level ${startCoord.level} &bull; Aisle ${startCoord.aisle} (${startCoord.isEven ? 'Right side' : 'Left side'})`
+      text: `Start at <strong>${escapeHtml(startName)}</strong>${startTag}.`,
+      subtext: `Level ${startCoord.level} &bull; Near Aisle ${startCoord.aisle}`
     });
 
     const distToConcourse = Math.round(Math.abs(startCoord.booth_y - bestConcourse.y) * 0.45);
@@ -907,17 +1138,21 @@ function calculateAndRenderRoute() {
         subtext: `Walk along designated concourse corridor (~${Math.round(aisleDistance)} ft)`
       });
 
+      const destWalkTarget = destCoord.isLandmark ? destName : `Booth #${destCoord.booth}`;
       steps.push({
         icon: 'fa-solid fa-diamond-turn-right',
-        text: `Turn into <strong>Aisle ${destCoord.aisle}</strong> and proceed toward Booth #${destCoord.booth}.`,
+        text: `Turn into <strong>Aisle ${destCoord.aisle}</strong> and proceed toward ${destWalkTarget}.`,
         subtext: `~${Math.round(Math.abs(destCoord.booth_y - bestConcourse.y) * 0.45)} ft`
       });
     }
 
+    const destTag = destCoord.isLandmark ? '' : ` (Booth #${destCoord.booth})`;
     steps.push({
       icon: 'fa-solid fa-flag-checkered',
-      text: `Arrive at <strong>${escapeHtml(destName)}</strong> (Booth #${destCoord.booth}).`,
-      subtext: `Destination reached on your ${destCoord.isEven ? 'right' : 'left'}`
+      text: `Arrive at <strong>${escapeHtml(destName)}</strong>${destTag}.`,
+      subtext: destCoord.isLandmark
+        ? `Destination reached on Level ${destCoord.level} near Aisle ${destCoord.aisle}`
+        : `Destination reached on your ${destCoord.isEven ? 'right' : 'left'}`
     });
   }
 
@@ -1146,17 +1381,41 @@ function drawCanvasMap() {
       ctx.fillText('L1 ⇄ L2 TRANSITION', lm.x + lm.width / 2, lm.y + 65);
 
     } else {
-      ctx.fillStyle = lm.type === 'entrance' ? 'rgba(16, 185, 129, 0.15)' :
-                      lm.type === 'stage' ? 'rgba(253, 81, 1, 0.15)' : 'rgba(2, 132, 199, 0.15)';
-      ctx.strokeStyle = lm.type === 'entrance' ? '#10b981' :
-                        lm.type === 'stage' ? '#fd5101' : '#0284c7';
-      ctx.lineWidth = 1.5;
-      roundRect(ctx, lm.x, lm.y, lm.width, lm.height, 12, true, true);
+      let fillColor = 'rgba(2, 132, 199, 0.15)';
+      let strokeColor = '#0284c7';
 
-      ctx.fillStyle = '#f8fafc';
-      ctx.font = '700 13px Outfit, sans-serif';
+      if (lm.type === 'entrance') {
+        fillColor = 'rgba(16, 185, 129, 0.18)';
+        strokeColor = '#10b981';
+      } else if (lm.type === 'amenity') {
+        fillColor = 'rgba(245, 158, 11, 0.18)';
+        strokeColor = '#f59e0b';
+      } else if (lm.type === 'stage') {
+        fillColor = 'rgba(253, 81, 1, 0.18)';
+        strokeColor = '#fd5101';
+      } else if (lm.type === 'restroom') {
+        fillColor = 'rgba(99, 102, 241, 0.18)';
+        strokeColor = '#6366f1';
+      } else if (lm.type === 'service') {
+        fillColor = 'rgba(56, 189, 248, 0.18)';
+        strokeColor = '#38bdf8';
+      }
+
+      ctx.fillStyle = fillColor;
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 1.8;
+      roundRect(ctx, lm.x, lm.y, lm.width, lm.height, 10, true, true);
+
+      // Category badge
+      ctx.fillStyle = strokeColor;
+      ctx.font = '700 10px Outfit, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(lm.name, lm.x + lm.width / 2, lm.y + lm.height / 2 + 5);
+      ctx.fillText(lm.type.toUpperCase(), lm.x + lm.width / 2, lm.y + 18);
+
+      // Landmark name
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = '700 12px Outfit, sans-serif';
+      ctx.fillText(lm.name, lm.x + lm.width / 2, lm.y + lm.height / 2 + 8);
     }
   });
 
@@ -1195,21 +1454,29 @@ function drawCanvasMap() {
     ctx.setLineDash([]);
 
     // START PIN (Pulsing Emerald Green)
+    const startPinLabel = AppState.activeRoute.startCoord.isLandmark
+      ? `START (L${AppState.activeRoute.startCoord.level}): ${AppState.activeRoute.startName}`
+      : `START (L${AppState.activeRoute.startCoord.level}): ${AppState.activeRoute.startName} (#${AppState.activeRoute.startCoord.booth})`;
+
     drawPulsingBeacon(
       ctx, 
       pts[0].x, 
       pts[0].y, 
       '#10b981', 
-      `START (L${AppState.activeRoute.startCoord.level}): ${AppState.activeRoute.startName} (#${AppState.activeRoute.startCoord.booth})`
+      startPinLabel
     );
 
     // DESTINATION PIN (Vivid Crimson Flag)
+    const destPinLabel = AppState.activeRoute.destCoord.isLandmark
+      ? `DEST (L${AppState.activeRoute.destCoord.level}): ${AppState.activeRoute.destName}`
+      : `DEST (L${AppState.activeRoute.destCoord.level}): ${AppState.activeRoute.destName} (#${AppState.activeRoute.destCoord.booth})`;
+
     drawDestinationBeacon(
       ctx, 
       pts[pts.length - 1].x, 
       pts[pts.length - 1].y, 
       '#f43f5e', 
-      `DEST (L${AppState.activeRoute.destCoord.level}): ${AppState.activeRoute.destName} (#${AppState.activeRoute.destCoord.booth})`
+      destPinLabel
     );
   }
 
@@ -1233,7 +1500,7 @@ function drawCanvasMap() {
     ctx.fillStyle = '#38bdf8';
     ctx.font = '700 11px Outfit, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`BOOTH #${hb.booth}`, hb.x, hb.y - 33);
+    ctx.fillText(hb.isLandmark ? 'VENUE AMENITY / FACILITY' : `BOOTH #${hb.booth}`, hb.x, hb.y - 33);
 
     ctx.fillStyle = '#f8fafc';
     ctx.font = '500 11px Inter, sans-serif';
@@ -1349,35 +1616,83 @@ function setupAutocomplete(input, listElem, clearBtn, onSelect) {
       return;
     }
 
-    const matches = AppState.exhibitors.filter(ex => 
-      ex.name.toLowerCase().includes(val) || ex.booth.toLowerCase().includes(val)
-    ).slice(0, 8);
+    // 1. Search Landmark matches (Food Court, Main Entrance, Registration, etc.)
+    const matchedLandmarks = HallModel.landmarks.filter(lm => {
+      const nameMatch = lm.name.toLowerCase().includes(val) || lm.shortName.toLowerCase().includes(val);
+      const aliasMatch = lm.aliases && lm.aliases.some(a => a.includes(val) || val.includes(a));
+      return nameMatch || aliasMatch;
+    });
 
-    if (matches.length === 0) {
-      listElem.innerHTML = `<div class="suggestion-item"><span class="sugg-name">No booths matching "${val}"</span></div>`;
+    // 2. Search Exhibitor matches
+    const matchedExhibitors = AppState.exhibitors.filter(ex => 
+      ex.name.toLowerCase().includes(val) || ex.booth.toLowerCase().includes(val)
+    ).slice(0, 7);
+
+    if (matchedLandmarks.length === 0 && matchedExhibitors.length === 0) {
+      listElem.innerHTML = `<div class="suggestion-item"><span class="sugg-name">No booths or landmarks matching "${escapeHtml(val)}"</span></div>`;
       listElem.style.display = 'block';
       return;
     }
 
-    listElem.innerHTML = matches.map(m => `
-      <div class="suggestion-item" data-booth="${m.booth}" data-name="${escapeHtml(m.name)}">
-        <span class="sugg-name">${highlightMatch(m.name, val)}</span>
-        <span class="sugg-booth">Booth ${m.booth} (L${getAisleLevel(parseInt(m.booth, 10))})</span>
-      </div>
-    `).join('');
+    let html = '';
 
+    // Landmark items at top
+    matchedLandmarks.forEach(lm => {
+      const typeLabel = lm.type === 'entrance' ? 'ENTRANCE' :
+                        lm.type === 'amenity' ? 'AMENITY' :
+                        lm.type === 'stage' ? 'STAGE' :
+                        lm.type === 'service' ? 'SERVICE' :
+                        lm.type === 'escalator' ? 'ESCALATOR' : 'FACILITY';
+      html += `
+        <div class="suggestion-item suggestion-landmark" data-landmark-id="${lm.id}" data-name="${escapeHtml(lm.name)}">
+          <span class="sugg-name">
+            <i class="fa-solid ${lm.icon}" style="color: var(--brand-orange); margin-right: 8px;"></i>
+            ${highlightMatch(lm.name, val)}
+          </span>
+          <span class="sugg-booth sugg-landmark-badge">${typeLabel} (L${lm.level === 'both' ? '1-2' : lm.level})</span>
+        </div>
+      `;
+    });
+
+    // Exhibitor items
+    matchedExhibitors.forEach(m => {
+      html += `
+        <div class="suggestion-item" data-booth="${m.booth}" data-name="${escapeHtml(m.name)}">
+          <span class="sugg-name">${highlightMatch(m.name, val)}</span>
+          <span class="sugg-booth">Booth ${m.booth} (L${getAisleLevel(parseInt(m.booth, 10))})</span>
+        </div>
+      `;
+    });
+
+    listElem.innerHTML = html;
     listElem.style.display = 'block';
   });
 
   listElem.addEventListener('click', (e) => {
     const item = e.target.closest('.suggestion-item');
-    if (item && item.dataset.booth) {
+    if (!item) return;
+
+    if (item.dataset.landmarkId) {
+      const lm = HallModel.landmarks.find(l => l.id === item.dataset.landmarkId);
+      if (lm) {
+        onSelect({
+          name: lm.name,
+          booth: lm.name,
+          isLandmark: true,
+          landmark: lm
+        });
+        input.value = lm.name;
+        clearBtn.style.display = 'block';
+      }
+    } else if (item.dataset.booth) {
       onSelect({
         booth: item.dataset.booth,
         name: item.dataset.name
       });
+      input.value = `${item.dataset.name} (Booth #${item.dataset.booth})`;
       clearBtn.style.display = 'block';
     }
+    listElem.style.display = 'none';
   });
 
   document.addEventListener('click', (e) => {
@@ -1453,6 +1768,14 @@ function renderExhibitorsList(list) {
 }
 
 function openBoothModal(booth, name) {
+  const lm = resolveLandmark(booth) || resolveLandmark(name);
+  if (lm) {
+    AppState.modalBooth = { booth: lm.name, name: lm.name, isLandmark: true, landmark: lm };
+    DOM.modalBoothNumber.textContent = `${lm.name} (Level ${lm.level === 'both' ? '1 & 2' : lm.level})`;
+    DOM.modalCompanyName.textContent = `Official Amenity / Service Hub &bull; Near Aisle ${lm.aisle}`;
+    DOM.boothModal.style.display = 'flex';
+    return;
+  }
   AppState.modalBooth = { booth, name };
   DOM.modalBoothNumber.textContent = `Booth #${booth} (Level ${getAisleLevel(parseInt(booth, 10))})`;
   DOM.modalCompanyName.textContent = name;

@@ -518,6 +518,21 @@ body {
   border-radius: 4px;
 }
 
+.suggestion-landmark {
+  background: rgba(16, 185, 129, 0.08);
+  border-left: 3px solid var(--accent-teal);
+}
+
+.suggestion-landmark:hover {
+  background: rgba(16, 185, 129, 0.22) !important;
+}
+
+.sugg-landmark-badge {
+  background: rgba(0, 229, 255, 0.18) !important;
+  color: var(--accent-cyan) !important;
+}
+
+
 /* Quick Landmark Chips */
 .quick-chips-section {
   display: flex;
